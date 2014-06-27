@@ -1,0 +1,26 @@
+---
+title: "Download counts"
+author: "Joe Cheng <joe@rstudio.com>"
+output: html_document
+---
+
+Source: http://cran-logs.rstudio.com/
+
+```{r echo=FALSE}
+library(dplyr, warn.conflicts=FALSE)
+library(ggplot2)
+daily <- readRDS("daily.rds")
+```
+
+```{r results='hold'}
+# Take the data from 2014
+perioddata <- daily %>% filter(date >= as.Date("2014-01-01"))
+
+# Take a look only at packages we're interested in
+pkgdata <- perioddata %>% filter(package %in% c("BRugs", "rbugs", "R2WinBUGS"))
+
+# Plot with some smoothing
+ggplot(pkgdata, aes(x = date, y = count, color = package)) +
+  expand_limits(y = 0) +
+  geom_smooth(se = FALSE, method = "loess", span = 0.4)
+```

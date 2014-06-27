@@ -1,0 +1,39 @@
+---
+title: "Download counts"
+author: "Joe Cheng <joe@rstudio.com>"
+output: html_document
+runtime: shiny
+---
+
+Source: http://cran-logs.rstudio.com/
+
+```{r echo=FALSE}
+library(dplyr, warn.conflicts=FALSE)
+library(ggplot2)
+daily <- readRDS("daily.rds")
+```
+
+```{r echo=FALSE, results='hold'}
+dateRangeInput("daterange", "Period",
+  "2014-01-01", max(daily$date), min(daily$date), max(daily$date))
+
+perioddata <- reactive({
+  daily %>% filter(date >= input$daterange[1] & date <= input$daterange[2])
+})
+
+selectInput("package", "Package(s)", multiple = TRUE,
+  choices = sort(unique(daily$package)), selected = c("BRugs", "rbugs", "R2WinBUGS"))
+
+pkgdata <- reactive({
+  perioddata() %>% filter(package %in% input$package)
+})
+
+sliderInput("smoothness", "Smoothness", 0, 1, 0.3)
+
+# Plot with a bit of smoothing
+renderPlot({
+  ggplot(pkgdata(), aes(x = date, y = count, color = package)) +
+    expand_limits(y = 0) +
+    geom_smooth(se = FALSE, method = "loess", span = input$smoothness)
+})
+```
