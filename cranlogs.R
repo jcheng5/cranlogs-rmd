@@ -1,7 +1,7 @@
 library(dplyr, warn.conflicts=FALSE)
 library(ggplot2)
 
-daily <- readRDS("daily.rds")
+daily <- tbl_df(readRDS("daily.rds"))
 daily
 
 # Take the data from 2014
